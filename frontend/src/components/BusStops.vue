@@ -13,7 +13,7 @@
     </div>
 
     <DataTable
-      :value="busStops"
+      :value="paginatedBusStops"
       :loading="loading"
       class="p-datatable-gridlines"
       responsiveLayout="scroll"
@@ -33,6 +33,14 @@
       </template>
     </DataTable>
 
+    <Paginator
+      v-model:first="first"
+      :rows="rows"
+      :totalRecords="busStops.length"
+      :rowsPerPageOptions="[5, 10, 20, 50]"
+      @page="onPageChange"
+    />
+
     <Dialog
       v-model:visible="displayDialog"
       modal
@@ -47,12 +55,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Button from "primevue/button";
+import Paginator from "primevue/paginator";
 import apiManager from "@/services/api";
 
 import StopDetailsDialog from "./StopDetailsDialog.vue";
@@ -64,12 +73,30 @@ const searchName = ref("");
 const displayDialog = ref(false);
 const selectedStop = ref(null);
 
+// 分页相关参数
+const first = ref(0);
+const rows = ref(10);
+
+// 计算当前页面数据
+const paginatedBusStops = computed(() => {
+  return busStops.value.slice(first.value, first.value + rows.value);
+});
+
+// 页面改变事件处理
+const onPageChange = (event) => {
+  first.value = event.first;
+  rows.value = event.rows;
+};
+
 const fetchBusStops = async (name = "") => {
   loading.value = true;
   try {
     const response = await apiManager.getAllStops(name);
-    let responseObject = responseAdapter(response);
+    let responseObject = responseAdapter(response).sort((a, b) =>
+      a.stopId.localeCompare(b.stopId)
+    );
     busStops.value = responseObject;
+    first.value = 0; // 重置到第一页
   } catch (error) {
     console.error("获取公交站点数据失败:", error);
     busStops.value = [];

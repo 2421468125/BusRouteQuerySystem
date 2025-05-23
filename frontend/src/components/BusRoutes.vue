@@ -13,7 +13,7 @@
     </div>
 
     <DataTable
-      :value="busRoutes"
+      :value="paginatedBusRoutes"
       :loading="loading"
       class="p-datatable-gridlines"
       responsiveLayout="scroll"
@@ -38,6 +38,14 @@
       </template>
     </DataTable>
 
+    <Paginator
+      v-model:first="first"
+      :rows="rows"
+      :totalRecords="busRoutes.length"
+      :rowsPerPageOptions="[5, 10, 20, 50]"
+      @page="onPageChange"
+    />
+
     <Dialog
       v-model:visible="displayDialog"
       modal
@@ -56,12 +64,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Button from "primevue/button";
+import Paginator from "primevue/paginator";
 import apiManager from "@/services/api";
 
 import RouteDetailsDialog from "./RouteDetailsDialog.vue";
@@ -73,12 +82,30 @@ const searchName = ref("");
 const displayDialog = ref(false);
 const selectedRoute = ref(null); // 依然保留，用于显示弹框标题
 
+// 分页相关参数
+const first = ref(0);
+const rows = ref(10);
+
+// 计算当前页面数据
+const paginatedBusRoutes = computed(() => {
+  return busRoutes.value.slice(first.value, first.value + rows.value);
+});
+
+// 页面改变事件处理
+const onPageChange = (event) => {
+  first.value = event.first;
+  rows.value = event.rows;
+};
+
 const fetchBusRoutes = async (name = "") => {
   loading.value = true;
   try {
     const response = await apiManager.getAllRoutes(name);
-    let responseObject = responseAdapter(response);
+    let responseObject = responseAdapter(response).sort((a, b) =>
+      a.routeNumber.localeCompare(b.routeNumber)
+    );
     busRoutes.value = responseObject;
+    first.value = 0; // 重置到第一页
   } catch (error) {
     console.error("获取公交线路数据失败:", error);
     busRoutes.value = [];

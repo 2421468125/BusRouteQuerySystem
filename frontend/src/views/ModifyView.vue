@@ -1,16 +1,16 @@
 <template>
-  <div class="home-container">
+  <div class="modify-container">
     <Menubar :model="items" class="app-menubar">
       <template #start>
         <img alt="logo" src="../assets/logo.png" height="40" class="p-mr-2" />
-        <span class="app-title">公交线路管理系统——查询</span>
+        <span class="app-title">公交线路管理系统——修改</span>
       </template>
       <template #end>
         <Button
-          label="修改线路"
-          icon="pi pi-cog"
+          label="返回首页"
+          icon="pi pi-home"
           class="p-button-primary p-button-rounded p-mr-2"
-          @click="goToModify"
+          @click="goToHome"
         />
         <Button
           label="退出登录"
@@ -35,46 +35,55 @@ import { useRouter } from "vue-router";
 import TabMenu from "primevue/tabmenu";
 import Menubar from "primevue/menubar";
 import Button from "primevue/button";
-
-// 导入子组件
-import BusRoutes from "@/components/BusRoutes.vue";
-import BusStops from "@/components/BusStops.vue";
-import NearbyUnits from "@/components/NearbyUnits.vue";
+import { useLoginStore } from "@/stores/loginStore";
+// 导入修改组件
+import BusRouteModify from "@/components/BusRouteModify.vue";
+import BusStopsModify from "@/components/BusStopsModify.vue";
+import NearbyUnitModify from "@/components/NearbyUnitModify.vue";
+import RouteStationModify from "@/components/RouteStationModify.vue";
 
 const router = useRouter();
 
 // 导航菜单项
 const items = ref([
-  { label: "公交线路", icon: "pi pi-compass", component: "BusRoutes" },
-  { label: "公交站点", icon: "pi pi-map-marker", component: "BusStops" },
-  { label: "沿线单位", icon: "pi pi-building", component: "NearbyUnits" },
+  { label: "公交线路管理", icon: "pi pi-compass", component: "BusRouteModify" },
+  {
+    label: "公交站点管理",
+    icon: "pi pi-map-marker",
+    component: "BusStopsModify",
+  },
+  {
+    label: "沿线单位管理",
+    icon: "pi pi-building",
+    component: "NearbyUnitModify",
+  },
+  {
+    label: "线路站点关系管理",
+    icon: "pi pi-sitemap",
+    component: "RouteStationModify",
+  },
 ]);
 
 // 当前选中的选项卡，默认显示第一个
 const activeItem = ref(items.value[0]);
 
-// 监听 TabMenu 的 tabChange 事件来更新 activeItem
-// TabMenu 组件没有直接的 v-model，但你可以通过 @tab-change 事件来控制
-// 这里我们使用计算属性来动态绑定 component
+// 计算当前应该显示的组件
 const currentTabComponent = computed(() => {
   switch (activeItem.value.component) {
-    case "BusRoutes":
-      return BusRoutes;
-    case "BusStops":
-      return BusStops;
-    case "NearbyUnits":
-      return NearbyUnits;
+    case "BusRouteModify":
+      return BusRouteModify;
+    case "BusStopsModify":
+      return BusStopsModify;
+    case "NearbyUnitModify":
+      return NearbyUnitModify;
+    case "RouteStationModify":
+      return RouteStationModify;
     default:
       return null;
   }
 });
 
-// PrimeVue TabMenu 没有直接的 v-model，需要手动处理点击事件来切换 activeItem
-const handleTabClick = (event) => {
-  activeItem.value = event.item;
-};
-
-// 重写 TabMenu 的 items 结构以包含 command 属性来更新 activeItem
+// 为每个菜单项添加命令函数
 items.value.forEach((item) => {
   item.command = () => {
     activeItem.value = item;
@@ -87,25 +96,25 @@ const logout = () => {
   router.push("/login");
 };
 
-// 跳转到修改信息页面
-const goToModify = () => {
-  router.push("/modify");
+// 返回首页
+const goToHome = () => {
+  router.push("/home");
 };
 </script>
 
 <style lang="scss" scoped>
-.home-container {
+.modify-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f8f9fa; // 轻微的背景色
+  background-color: #f8f9fa;
 }
 
 .app-menubar {
-  background-color: #424242; // 深色背景
-  color: #ffffff; // 白色文字
+  background-color: #424242;
+  color: #ffffff;
   padding: 0.8rem 1.5rem;
-  border-radius: 0; // 移除圆角
+  border-radius: 0;
   .p-menubar-start {
     display: flex;
     align-items: center;
@@ -117,7 +126,7 @@ const goToModify = () => {
     color: #ffffff;
   }
   .p-button-danger.p-button-text {
-    color: #ffcccc !important; // 退出按钮颜色
+    color: #ffcccc !important;
     &:hover {
       background-color: rgba(255, 255, 255, 0.1);
     }
@@ -125,25 +134,23 @@ const goToModify = () => {
 }
 
 .tab-navigation {
-  margin-top: 0; // 紧贴顶部导航栏
+  margin-top: 0;
   background-color: #ffffff;
   border-bottom: 1px solid #dee2e6;
   .p-tabmenu-nav {
-    justify-content: center; // 选项卡居中
+    justify-content: center;
   }
   .p-menuitem-link {
-    padding: 1rem 1.5rem; // 增加点击区域
+    padding: 1rem 1.5rem;
   }
 }
 
 .content-panel {
-  flex-grow: 1; // 填充剩余空间
+  flex-grow: 1;
   padding: 2rem;
   background-color: #ffffff;
   margin: 1rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
-
-// 确保 logo.png 在 src/assets 目录下
 </style>

@@ -19,7 +19,7 @@
     </div>
 
     <DataTable
-      :value="nearbyUnits"
+      :value="paginatedNearbyUnits"
       :loading="loading"
       class="p-datatable-gridlines"
       responsiveLayout="scroll"
@@ -28,7 +28,7 @@
       <Column field="unitName" header="单位名称"></Column>
       <Column field="contactPhone" header="联系电话"></Column>
       <Column field="nearbyStopId" header="附近站点ID"></Column>
-      <Column field="distanceToStop" header="距离站点(米)"></Column>
+      <Column field="distanceToStop" header="距离站点(km)"></Column>
       <template #empty>
         <div class="p-text-center">没有找到附近单位数据。</div>
       </template>
@@ -37,21 +37,45 @@
         正在加载附近单位数据...
       </template>
     </DataTable>
+
+    <Paginator
+      v-model:first="first"
+      :rows="rows"
+      :totalRecords="nearbyUnits.length"
+      :rowsPerPageOptions="[5, 10, 20, 50]"
+      @page="onPageChange"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import InputText from "primevue/inputtext";
 import Button from "primevue/button";
+import Paginator from "primevue/paginator";
 import apiManager from "@/services/api";
 
 const nearbyUnits = ref([]);
 const loading = ref(true);
 const searchName = ref("");
 const searchStopId = ref("");
+
+// 分页相关参数
+const first = ref(0);
+const rows = ref(10);
+
+// 计算当前页面数据
+const paginatedNearbyUnits = computed(() => {
+  return nearbyUnits.value.slice(first.value, first.value + rows.value);
+});
+
+// 页面改变事件处理
+const onPageChange = (event) => {
+  first.value = event.first;
+  rows.value = event.rows;
+};
 
 const fetchNearbyUnits = async (name = "", stopId = "") => {
   loading.value = true;
@@ -60,7 +84,10 @@ const fetchNearbyUnits = async (name = "", stopId = "") => {
       name || null,
       stopId || null
     );
-    nearbyUnits.value = responseAdapter(response);
+    nearbyUnits.value = responseAdapter(response).sort((a, b) =>
+      a.unitId.localeCompare(b.unitId)
+    );
+    first.value = 0; // 重置到第一页
   } catch (error) {
     console.error("获取附近单位数据失败:", error);
     nearbyUnits.value = [];
