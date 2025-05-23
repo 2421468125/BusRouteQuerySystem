@@ -8,6 +8,7 @@ class Database:
     database = None
     @staticmethod
     def read_settings():
+        import os
         with open("backend/app/settings.json", "r", encoding='utf-8') as file:
             settings = json.load(file)
         return settings

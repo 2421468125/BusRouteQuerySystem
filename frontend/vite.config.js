@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import fs from 'fs'
 
-const jsonData = JSON.parse(fs.readFileSync('backend/app/settings.json', 'utf-8'));
+const jsonData = JSON.parse(fs.readFileSync('../backend/app/settings.json', 'utf-8'));
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -26,6 +26,6 @@ export default defineConfig({
     },
   },
   define:{
-    __BASE_URL__: JSON.stringify(jsonData.ServerHost+':'+jsonData.ServerPort),
+    __BASE_URL__: JSON.stringify("http://"+jsonData.ServerHost+':'+jsonData.ServerPort),
   },
 })

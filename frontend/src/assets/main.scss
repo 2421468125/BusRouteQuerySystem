@@ -5,7 +5,7 @@ $primary-color: #3498db;
 $secondary-color: #2ecc71;
 $text-color: #333;
 $background-color: #f4f4f4;
-$font-family: 'Arial', sans-serif;
+$font-family: "Arial", sans-serif;
 
 // Mixins
 @mixin flex-center {
@@ -50,10 +50,6 @@ body {
   text-decoration: none;
   cursor: pointer;
   transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: adjust-color($primary-color, $lightness: -10%);
-  }
 }
 
 .card {

@@ -50,7 +50,7 @@ def get_bus_stop_details(stop_id):
     passing_routes_query = """
     SELECT r.route_id, r.route_name, r.start_station, r.end_station, sr.stop_order
     FROM BusSystem.BusRoute r
-    JOIN BusSystem.StopRoute sr ON r.route_id = sr.route_id
+    JOIN BusSystem.RouteStopDetail sr ON r.route_id = sr.route_id
     WHERE sr.stop_id = %s;
     """
     passing_routes = Database.get_instance().read_query(passing_routes_query, (stop_id,))

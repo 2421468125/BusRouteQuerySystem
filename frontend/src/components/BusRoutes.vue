@@ -1,11 +1,24 @@
 <template>
   <div class="data-view">
     <h3>公交线路信息</h3>
+
+    <div class="search-bar">
+      <InputText
+        v-model="searchName"
+        type="text"
+        placeholder="按名称查询"
+        @keyup.enter="searchByName"
+      />
+      <Button icon="pi pi-search" label="搜索" @click="searchByName" />
+    </div>
+
     <DataTable
       :value="busRoutes"
       :loading="loading"
       class="p-datatable-gridlines"
       responsiveLayout="scroll"
+      selectionMode="single"
+      @row-click="showRouteDetails"
     >
       <Column field="routeNumber" header="线路编号"></Column>
       <Column field="routeName" header="线路名称"></Column>
@@ -13,8 +26,9 @@
       <Column field="firstDeparture" header="首班车时间"></Column>
       <Column field="lastDeparture" header="末班车时间"></Column>
       <Column field="peakInterval" header="高峰间隔 (min)"></Column>
-      <Column field="normalInterval" header="平时间隔 (min)"></Column>
-      <Column field="startEndStations" header="首末站点"></Column>
+      <Column field="offPeakInterval" header="平时间隔 (min)"></Column>
+      <Column field="startStation" header="始发站点"></Column>
+      <Column field="endStation" header="终点站点"></Column>
       <template #empty>
         <div class="p-text-center">没有找到公交线路数据。</div>
       </template>
@@ -23,6 +37,21 @@
         正在加载公交线路数据...
       </template>
     </DataTable>
+
+    <Dialog
+      v-model:visible="displayDialog"
+      modal
+      :header="
+        selectedRoute ? selectedRoute.routeName + ' 线路详情' : '线路详情'
+      "
+      :style="{ width: '60vw' }"
+      :breakpoints="{ '1199px': '80vw', '575px': '95vw' }"
+      :closable="true"
+    >
+      <RouteDetailsDialog
+        :routeNumber="selectedRoute ? selectedRoute.routeNumber : null"
+      />
+    </Dialog>
   </div>
 </template>
 
@@ -30,29 +59,65 @@
 import { ref, onMounted } from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
-// 引入 axios 或 fetch API 用于数据请求
-import axios from "axios"; // 假设你已经安装了 axios
+import Dialog from "primevue/dialog";
+import InputText from "primevue/inputtext";
+import Button from "primevue/button";
+import apiManager from "@/services/api";
+
+import RouteDetailsDialog from "./RouteDetailsDialog.vue";
 
 const busRoutes = ref([]);
-const loading = ref(true); // 添加加载状态
+const loading = ref(true);
+const searchName = ref("");
 
-// 模拟后端 API 地址
-const API_URL = "/api/busroutes"; // 你需要替换成实际的后端API地址
+const displayDialog = ref(false);
+const selectedRoute = ref(null); // 依然保留，用于显示弹框标题
 
-const fetchBusRoutes = async () => {
-  loading.value = true; // 开始加载
+const fetchBusRoutes = async (name = "") => {
+  loading.value = true;
   try {
-    const response = await axios.get(API_URL);
-    busRoutes.value = response.data; // 假设后端返回的数据就是我们需要的数组
+    const response = await apiManager.getAllRoutes(name);
+    let responseObject = responseAdapter(response);
+    busRoutes.value = responseObject;
   } catch (error) {
     console.error("获取公交线路数据失败:", error);
-    // 可以添加错误提示给用户
+    busRoutes.value = [];
   } finally {
-    loading.value = false; // 停止加载
+    loading.value = false;
   }
 };
 
-// 在组件挂载时调用数据获取函数
+const searchByName = () => {
+  fetchBusRoutes(searchName.value);
+};
+
+const showRouteDetails = (event) => {
+  selectedRoute.value = event.data; // 存储选中行数据，用于弹框标题
+  displayDialog.value = true; // 显示弹框
+};
+
+const responseAdapter = (response) => {
+  if (!Array.isArray(response) || !response.every(Array.isArray)) {
+    console.warn("API 响应格式不符合预期，期望二维数组。", response);
+    return [];
+  }
+  return response
+    .map((route) => {
+      return {
+        routeNumber: route[0],
+        routeName: route[1],
+        mileage: route[2],
+        firstDeparture: route[3],
+        lastDeparture: route[4],
+        peakInterval: route[5],
+        offPeakInterval: route[6],
+        startStation: route[7] + route[9],
+        endStation: route[8] + route[10],
+      };
+    })
+    .filter(Boolean);
+};
+
 onMounted(() => {
   fetchBusRoutes();
 });
@@ -61,5 +126,13 @@ onMounted(() => {
 <style lang="scss" scoped>
 .data-view {
   padding: 1rem;
+}
+.search-bar {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  .p-inputtext {
+    flex: 1;
+  }
 }
 </style>
