@@ -1,0 +1,9 @@
+{
+  "Port": 5432,
+  "Host": "127.0.0.1",
+  "Username": "user1",
+  "Database": "db1",
+  "Password": "OpenGauss@123",
+  "ServerPort": 8080,
+  "ServerHost": "127.0.0.1"
+}
