@@ -66,6 +66,18 @@ class Database:
         finally:
             cursor.close()
 
+    def execute_query_function(self, query_func):
+        cursor = self.connection.cursor()
+        try:
+            query_func(cursor)
+            self.connection.commit()
+            print("Multiple queries executed successfully")
+        except Error as err:
+            self.connection.rollback() 
+            print(f"Error: '{err}'")
+        finally:
+            cursor.close()
+    
     def read_query(self,query, params=None):
         cursor = self.connection.cursor()
         result = None

@@ -101,4 +101,5 @@ def reorder_stops_on_route(
         reorder_stops(route_id, stop_ordering)
         return {"message": "Stops reordered successfully", "route_id": route_id}
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=400, detail=str(e))

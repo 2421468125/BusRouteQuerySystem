@@ -6,13 +6,7 @@ BusRouteQuerySystem/
 │ │ ├── assets/ # 静态资源，如图片、样式
 │ │ │ └── main.css
 │ │ ├── components/ # 可复用组件
-│ │ │ ├── BusRoutes.vue
-│ │ │ ├── BusStops.vue
-│ │ │ └── NearbyUnits.vue
 │ │ ├── views/ # 页面级组件
-│ │ │ ├── BusRoutes.vue # 公交线路查询页面
-│ │ │ ├── LoginView.vue # 登录界面
-│ │ │ └── HomeView.vue # 首页
 │ │ ├── router/
 │ │ │ └── index.js # Vue Router 配置
 │ │ ├── services/
@@ -36,11 +30,6 @@ BusRouteQuerySystem/
 │ │ │ ├── bus_routes.py # 公交线路数据操作
 │ │ │ ├── bus_stops.py # 公交站点数据操作
 │ │ │ └── nearby_units.py # 沿线单位数据操作
-│ │ ├── schemas/
-│ │ │ ├── **init**.py
-│ │ │ ├── bus_routes.py # Pydantic 模型，用于请求和响应数据验证
-│ │ │ ├── bus_stops.py
-│ │ │ └── nearby_units.py
 │ │ ├── core/
 │ │ │ ├── **init**.py
 │ │ │ └── database.py # 数据库连接和会话管理

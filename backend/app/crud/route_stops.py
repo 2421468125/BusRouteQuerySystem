@@ -71,9 +71,16 @@ def reorder_stops(route_id, stop_ordering_data):
     - stop_ordering_data: 站点排序数据，格式为 [{stop_id: xxx, stop_order: n}, ...]
     """
     db = Database.get_instance()
-    try:
-        # 开始事务
-        db.begin_transaction()
+    def query_func(cursor):
+        for i, item in enumerate(stop_ordering_data):
+            temp_order = -(i + 1000)  # 使用足够小的负值避免冲突
+            query = """
+            UPDATE BusSystem.RouteStopDetail
+            SET stop_order = %s
+            WHERE route_id = %s AND stop_id = %s;
+            """
+            params = (temp_order, route_id, item['stop_id'])
+            cursor.execute(query, params)
         
         for item in stop_ordering_data:
             query = """
@@ -82,12 +89,6 @@ def reorder_stops(route_id, stop_ordering_data):
             WHERE route_id = %s AND stop_id = %s;
             """
             params = (item['stop_order'], route_id, item['stop_id'])
-            db.execute_query(query, params)
-        
-        # 提交事务
-        db.commit_transaction()
-        return True
-    except Exception as e:
-        # 回滚事务
-        db.rollback_transaction()
-        raise e
+            cursor.execute(query, params)
+    db.execute_query_function(query_func)
+    return True

@@ -1,6 +1,6 @@
 <template>
   <div class="login-container">
-    <p class="title">公交线路查询系统</p>
+    <p class="title">公交线路管理系统</p>
     <Card class="p-card login-card">
       <template #title> 登录 </template>
       <template #content>

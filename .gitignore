@@ -1,2 +1,4 @@
 *.vscode/*
 *__pycache__/*
+picture/*
+设计报告.md

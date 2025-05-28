@@ -377,11 +377,16 @@ const loadRouteStops = async () => {
 
 // 行重新排序处理
 const onRowReorder = (event) => {
+  console.log("Row reordered:", event);
   stopsChanged.value = true;
   // 更新站点序号
-  routeStops.value.forEach((stop, index) => {
+  const draggedData = [...event.value];
+  draggedData.forEach((stop, index) => {
     stop.stop_number = index + 1;
   });
+
+  routeStops.value = draggedData;
+  console.log("Updated route stops:", routeStops.value);
 };
 
 // 打开添加站点对话框
@@ -531,7 +536,7 @@ const saveStopOrder = async () => {
       stop_id: stop.stop_id,
       stop_order: stop.stop_number,
     }));
-
+    console.log("Saving stop order:", orderData);
     await apiManager.reorderStopsOnRoute(selectedRoute.value._id, orderData);
     stopsChanged.value = false;
     toast.add({
